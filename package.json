@@ -1,0 +1,31 @@
+{
+  "name": "Autenticacion-General-Backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@gitlab.com:recagua/autenticacion.git",
+  "author": "Diego Jared  Donis Soto <programacion4@recagua.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "src/index.ts",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "msnodesqlv8": "^2.4.7",
+    "mssql": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.13",
+    "@types/mssql": "^7.1.5",
+    "dotenv": "^16.0.0",
+    "jest": "^27.5.1",
+    "ts-node": "^10.7.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.6.3"
+  }
+}
