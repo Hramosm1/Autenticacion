@@ -4,6 +4,6 @@ const controller = new Permisosporrol()
 const router = Router()
 
 router.get('/:id', controller.getById)
-router.put('/:id', controller.editById)
+router.put('/', controller.editPermisos)
 
 export default router

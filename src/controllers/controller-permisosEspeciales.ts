@@ -30,7 +30,7 @@ export class Permisosespeciales {
             const request = pool?.request()
             request?.input('nombre', VarChar(150), nombre)
             request?.input('idAplicacion', Int, idAplicacion)
-            const result = await request?.query('INSERT INTO PermisosEspeciales (nombre, idAplicacion) VALUES (@nombre, @idAplicaciones)')
+            const result = await request?.query('INSERT INTO PermisosEspeciales (nombre, idAplicacion) VALUES (@nombre, @idAplicacion)')
             res.send(result)
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })
@@ -45,7 +45,7 @@ export class Permisosespeciales {
             request?.input('id', Int, id)
             request?.input('nombre', VarChar(150), nombre)
             request?.input('idAplicacion', Int, idAplicacion)
-            const result = await request?.query('UPDATE PermisosEspeciales SET nombre = @nombre idAplicacion = @idAplicacion WHERE id = @id')
+            const result = await request?.query('UPDATE PermisosEspeciales SET nombre = @nombre, idAplicacion = @idAplicacion WHERE id = @id')
             res.send(result)
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })

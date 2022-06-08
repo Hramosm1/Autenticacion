@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { getPool } from '../database'
 import { Bit, Int } from 'mssql/msnodesqlv8'
+import { BodyPermisos } from '../interfaces/interface-permisosPorRol'
 export class Permisosporrol {
     async getById(req: Request, res: Response) {
         const { id } = req.params
@@ -8,25 +9,21 @@ export class Permisosporrol {
             const pool = await getPool()
             const request = pool?.request()
             request?.input('id', Int, id)
-            const result = await request?.query('SELECT * FROM VW_Permisos WHERE idModulo = @id')
+            const result = await request?.query('SELECT * FROM VW_Permisos WHERE idModulo = @id AND activo = 1')
             res.send(result?.recordset)
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })
         }
     }
-    async editById(req: Request, res: Response) {
-        const { id } = req.params
-        const { ver, crear, editar, eliminar } = req.body
+    async editPermisos(req: Request, res: Response) {
+        const body: BodyPermisos[] = Object.values(req.body)
+        const stIterable = body.map(({ ver, crear, editar, eliminar, id }) => `UPDATE Permisos SET ver=${Number(ver)}, crear=${Number(crear)}, editar=${Number(editar)}, eliminar=${Number(eliminar)} WHERE id = ${id}`)
         try {
             const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', Int, id)
-            request?.input('ver', Bit, ver)
-            request?.input('crear', Bit, crear)
-            request?.input('editar', Bit, editar)
-            request?.input('eliminar', Bit, eliminar)
-            const result = await request?.query('UPDATE Permisos SET ver = @ver, crear = @crear, editar = @editar, eliminar = @eliminar WHERE id = @id')
-            res.send(result)
+            for await (const query of stIterable) {
+                await pool?.query(query)
+            }
+            res.send({ status: 200 })
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })
         }

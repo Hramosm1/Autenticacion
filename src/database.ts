@@ -8,6 +8,8 @@ const sqlConfig: config = {
   server: process.env.SERVER || '',
   database: process.env.DATABASE,
   driver: 'msnodesqlv8',
+  //user: process.env.USER || '',
+  //password: process.env.PASS || '',
   options: {
     trustedConnection: true,
     trustServerCertificate: true
