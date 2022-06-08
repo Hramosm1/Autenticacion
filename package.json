@@ -6,7 +6,7 @@
   "author": "Diego Jared  Donis Soto <programacion4@recagua.com>",
   "license": "MIT",
   "scripts": {
-    "start": "src/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/index.ts",
     "test": "jest"

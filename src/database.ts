@@ -8,10 +8,10 @@ const sqlConfig: config = {
   server: process.env.SERVER || '',
   database: process.env.DATABASE,
   driver: 'msnodesqlv8',
-  //user: process.env.USER || '',
-  //password: process.env.PASS || '',
+  user: process.env.USER || '',
+  password: process.env.PASS || '',
   options: {
-    trustedConnection: true,
+    trustedConnection: Boolean(process.env.WINDOWSAUTH),
     trustServerCertificate: true
   }
 }
