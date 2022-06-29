@@ -4,8 +4,9 @@ import { UniqueIdentifier } from 'mssql/msnodesqlv8'
 export class Usuarios {
     async getAll(req: Request, res: Response) {
         try {
-            const pool = await getPool()
-            const result = await pool?.query('SELECT id, usuario, nombre, idCobrador, correo FROM Usuarios WHERE activo = 1')
+            const conn = await getPool()
+            const result = await conn?.query('SELECT id, usuario, nombre, correo FROM Usuarios WHERE activo = 1')
+            await conn?.close()
             res.send(result?.recordset)
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })
@@ -17,7 +18,7 @@ export class Usuarios {
             const pool = await getPool()
             const request = pool?.request()
             request?.input('id', UniqueIdentifier, id)
-            const result = await request?.query('SELECT id, usuario, nombre, idPersonaUnica, idCobrador, fechaCreacion  FROM Usuarios WHERE id = @id')
+            const result = await request?.query('SELECT id, usuario, nombre, idPersonaUnica, idCobrador, correo, fechaCreacion  FROM Usuarios WHERE id = @id')
             res.send(result?.recordset[0])
         } catch (ex: any) {
             res.status(404).send({ message: 'error en la consulta', error: ex.message })
