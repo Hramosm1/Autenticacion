@@ -1,47 +1,52 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { Int, VarChar } from 'mssql/msnodesqlv8';
-import { generateToken, validateToken } from '../core/utils';
-import { getPool } from '../database';
+import { generateToken, validateToken, getUserLogin } from '../core/utils';
+import { Unauthorized, BadRequest } from "http-errors";
+import { prisma } from '../database';
 export class Login {
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response, next: NextFunction) {
     const exp = req.params.duracion || '24h'
-    const { user, password, aplicacion } = req.body
     try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('user', VarChar(150), user)
-      request?.input('pass', VarChar(150), password)
-      request?.input('idApp', Int, aplicacion)
-      const result = await request?.execute('SP_Login')
-      if (result?.recordsets.length == 3) {
-        const [usuario, permisos, permisosEspeciales] = result?.recordsets as Array<any[]>
-        res.send({ accessToken: generateToken({ user, password, aplicacion }, exp), user: { ...usuario[0], permisos, permisosEspeciales } })
-      } else res.status(401).send(result?.recordset[0])
+      //-----------------VALIDACION DE USUARIO
+
+      const consulta = await getUserLogin(req.body)
+      if (consulta) {
+        //-----------------GENERACION DE TOKEN
+        const accessToken = generateToken({ id: consulta.id }, exp)
+        //-----------------GENERACION DE RESULTADO
+        const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = consulta
+        const user = {
+          id,
+          usuario,
+          nombre,
+          idPersonaUnica,
+          correo,
+          permisos: RolPorUsuario[0].Roles.Permisos,
+          permisosEspeciales: RolPorUsuario[0].Roles.PermisosEspecialesPorRol
+            .map(({ PermisosEspeciales }) => PermisosEspeciales)
+        }
+        res.send({ accessToken, user })
+      }
+      else {
+        next(new Unauthorized('Usuario o contraseña no válidos'))
+      }
     } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
+      next(new BadRequest(ex))
     }
   }
-  async loginWithToken(req: Request, res: Response) {
+  async loginWithToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const { user, password, aplicacion } = validateToken(req.params.token) as JwtPayload
+      console.log(req.headers.authorization)
+      // const res = validateToken(req.params.token) as JwtPayload
       const exp = '24h'
       try {
-        const pool = await getPool()
-        const request = pool?.request()
-        request?.input('user', VarChar(150), user)
-        request?.input('pass', VarChar(150), password)
-        request?.input('idApp', Int, aplicacion)
-        const result = await request?.execute('SP_Login')
-        if (result?.recordsets.length == 3) {
-          const [usuario, permisos, permisosEspeciales] = result?.recordsets as Array<any[]>
-          res.send({ accessToken: generateToken({ user, password, aplicacion }, exp), user: { ...usuario[0], permisos, permisosEspeciales } })
-        } else res.status(401).send(result?.recordset[0])
+
+        res.send('res')
       } catch (ex: any) {
-        res.status(404).send({ message: 'error en la consulta', error: ex.message })
+        next(new BadRequest(ex))
       }
     } catch (error) {
-      res.status(403).send('token no valido')
+      next(new Unauthorized('token no valido'))
     }
   }
 }

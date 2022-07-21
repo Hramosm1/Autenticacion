@@ -1,7 +1,10 @@
 //importaciones de express
-import express, { Application, json, urlencoded } from "express";
+import express, { Application } from "express";
+
+//importaciones midlewares
 import cors from "cors";
 import dotenv from 'dotenv'
+import { json, urlencoded } from "body-parser";
 //importacion de rutas
 import aplicaciones from './routes/aplicaciones'
 import modulos from './routes/modulos'
@@ -14,7 +17,7 @@ import login from './routes/login'
 
 dotenv.config()
 function settings(): void {
-  app.set("port", process.env.PORT || 3000);
+  app.set("port", process.env.PORT || 9401);
 }
 //midlewares a implementar
 function midlewares(): void {
