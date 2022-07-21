@@ -1,30 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import { generateToken, validateToken, getUserLogin, getUserByToken, parseUser } from '../core/utils';
+import { Unauthorized, BadRequest, NotFound } from "http-errors";
 import { JwtPayload } from 'jsonwebtoken';
-import { generateToken, validateToken, getUserLogin } from '../core/utils';
-import { Unauthorized, BadRequest } from "http-errors";
-import { prisma } from '../database';
 export class Login {
   async login(req: Request, res: Response, next: NextFunction) {
     const exp = req.params.duracion || '24h'
     try {
       //-----------------VALIDACION DE USUARIO
 
-      const consulta = await getUserLogin(req.body)
-      if (consulta) {
+      const permisos = await getUserLogin(req.body)
+      if (permisos) {
         //-----------------GENERACION DE TOKEN
-        const accessToken = generateToken({ id: consulta.id }, exp)
+        const accessToken = generateToken({ id: permisos.id, idAplicacion: Number(req.body.aplicacion) }, exp)
         //-----------------GENERACION DE RESULTADO
-        const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = consulta
-        const user = {
-          id,
-          usuario,
-          nombre,
-          idPersonaUnica,
-          correo,
-          permisos: RolPorUsuario[0].Roles.Permisos,
-          permisosEspeciales: RolPorUsuario[0].Roles.PermisosEspecialesPorRol
-            .map(({ PermisosEspeciales }) => PermisosEspeciales)
-        }
+        const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = permisos
+        const user = parseUser(id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario)
         res.send({ accessToken, user })
       }
       else {
@@ -35,18 +25,24 @@ export class Login {
     }
   }
   async loginWithToken(req: Request, res: Response, next: NextFunction) {
-    try {
-      console.log(req.headers.authorization)
-      // const res = validateToken(req.params.token) as JwtPayload
-      const exp = '24h'
+    const exp = '24h'
+    if (req.headers.authorization) {
+      const [tipo, accessToken] = req.headers.authorization.split(' ')
       try {
-
-        res.send('res')
+        const { id, idAplicacion } = validateToken(accessToken) as JwtPayload
+        const permisos = await getUserByToken(id, idAplicacion)
+        if (permisos) {
+          const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = permisos
+          const user = parseUser(id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario)
+          res.send({ accessToken, user })
+        } else {
+          next(new NotFound())
+        }
       } catch (ex: any) {
-        next(new BadRequest(ex))
+        next(new Unauthorized(ex))
       }
-    } catch (error) {
-      next(new Unauthorized('token no valido'))
+    } else {
+      next(new Unauthorized('falta token'))
     }
   }
 }

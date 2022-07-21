@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { prisma } from '../database'
-import createError, { BadRequest, NotFound, HttpError } from "http-errors";
+import { BadRequest } from "http-errors";
 export class Aplicaciones {
     async getAll(req: Request, res: Response, next: NextFunction) {
         try {
@@ -17,7 +17,6 @@ export class Aplicaciones {
         } catch (ex: any) {
             next(new BadRequest(ex))
         }
-        //res.send(result)
     }
     async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params
