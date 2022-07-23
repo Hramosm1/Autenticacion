@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/index.ts",
-    "test": "jest"
+    "test": "jest",
+    "doc": "apidoc-markdown -i src -o doc.md"
   },
   "dependencies": {
     "@prisma/client": "^4.0.0",
@@ -31,6 +32,7 @@
     "@types/jsonwebtoken": "^8.5.8",
     "@types/lodash": "^4.14.182",
     "@types/supertest": "^2.0.12",
+    "apidoc-markdown": "^7.1.1",
     "dotenv": "^16.0.0",
     "jest": "^28.1.3",
     "prisma-dbml-generator": "^0.9.1",
