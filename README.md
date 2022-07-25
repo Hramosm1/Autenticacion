@@ -294,7 +294,7 @@ GET /modulos/:id
 
 | Name     | Type       | Description                           |
 |----------|------------|---------------------------------------|
-| id | `String` | <p>id del modulo</p> |
+| id | `Number` | <p>id del modulo</p> |
 
 ## <a name='Varios-Modulos'></a> Varios Modulos
 [Back to top](#top)
@@ -342,7 +342,92 @@ GET /permisos/:id
 
 | Name     | Type       | Description                           |
 |----------|------------|---------------------------------------|
-| id | `String` | <p>id de un modulo [ { &quot;id&quot;:1, &quot;ver&quot;:true, &quot;crear&quot;:true, &quot;editar&quot;:true, &quot;eliminar&quot;:true, &quot;Roles&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Administrador&quot; }, &quot;Modulos&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Tickets&quot;, &quot;Aplicaciones&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Help Desk&quot; } } }, { &quot;id&quot;:3, &quot;ver&quot;:true, &quot;crear&quot;:true, &quot;editar&quot;:false, &quot;eliminar&quot;:false, &quot;Roles&quot;:{ &quot;id&quot;:2, &quot;nombre&quot;:&quot;Soporte&quot; }, &quot;Modulos&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Tickets&quot;, &quot;Aplicaciones&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Help Desk&quot; } } }, { &quot;id&quot;:5, &quot;ver&quot;:true, &quot;crear&quot;:true, &quot;editar&quot;:true, &quot;eliminar&quot;:true, &quot;Roles&quot;:{ &quot;id&quot;:3, &quot;nombre&quot;:&quot;Desarrollo&quot; }, &quot;Modulos&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Tickets&quot;, &quot;Aplicaciones&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Help Desk&quot; } } }, { &quot;id&quot;:7, &quot;ver&quot;:true, &quot;crear&quot;:true, &quot;editar&quot;:false, &quot;eliminar&quot;:false, &quot;Roles&quot;:{ &quot;id&quot;:4, &quot;nombre&quot;:&quot;Usuario&quot; }, &quot;Modulos&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Tickets&quot;, &quot;Aplicaciones&quot;:{ &quot;id&quot;:1, &quot;nombre&quot;:&quot;Help Desk&quot; } } } ]</p> |
+| id | `Number` | <p>id de un modulo</p> |
+
+### Success response example
+
+#### Success response example - `json-resultado`
+
+```json
+[
+   {
+      "id":1,
+      "ver":true,
+      "crear":true,
+      "editar":true,
+      "eliminar":true,
+      "Roles":{
+         "id":1,
+         "nombre":"Administrador"
+      },
+      "Modulos":{
+         "id":1,
+         "nombre":"Tickets",
+         "Aplicaciones":{
+            "id":1,
+            "nombre":"Help Desk"
+         }
+      }
+   },
+   {
+      "id":3,
+      "ver":true,
+      "crear":true,
+      "editar":false,
+      "eliminar":false,
+      "Roles":{
+         "id":2,
+         "nombre":"Soporte"
+      },
+      "Modulos":{
+         "id":1,
+         "nombre":"Tickets",
+         "Aplicaciones":{
+            "id":1,
+            "nombre":"Help Desk"
+         }
+      }
+   },
+   {
+      "id":5,
+      "ver":true,
+      "crear":true,
+      "editar":true,
+      "eliminar":true,
+      "Roles":{
+         "id":3,
+         "nombre":"Desarrollo"
+      },
+      "Modulos":{
+         "id":1,
+         "nombre":"Tickets",
+         "Aplicaciones":{
+            "id":1,
+            "nombre":"Help Desk"
+         }
+      }
+   },
+   {
+      "id":7,
+      "ver":true,
+      "crear":true,
+      "editar":false,
+      "eliminar":false,
+      "Roles":{
+         "id":4,
+         "nombre":"Usuario"
+      },
+      "Modulos":{
+         "id":1,
+         "nombre":"Tickets",
+         "Aplicaciones":{
+            "id":1,
+            "nombre":"Help Desk"
+         }
+      }
+   }
+]
+```
 
 # <a name='roles'></a> roles
 

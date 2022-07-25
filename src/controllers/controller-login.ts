@@ -7,7 +7,6 @@ export class Login {
     const exp = req.params.duracion || '24h'
     try {
       //-----------------VALIDACION DE USUARIO
-
       const permisos = await getUserLogin(req.body)
       if (permisos) {
         //-----------------GENERACION DE TOKEN

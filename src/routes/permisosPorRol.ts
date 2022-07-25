@@ -9,7 +9,9 @@ const router = Router()
  * @api {get} /permisos/:id Permisos de un modulo
  * @apiGroup /permisos
  * 
- * @apiParam  {String} id id de un modulo
+ * @apiParam  {Number} id id de un modulo
+ * 
+ * @apiSuccessExample  {json} json-resultado
  * [
  *    {
  *       "id":1,

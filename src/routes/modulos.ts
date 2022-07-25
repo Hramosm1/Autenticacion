@@ -27,7 +27,7 @@ const router = Router()
  * @api {get} /modulos/:id Un modulo
  * @apiGroup /modulos
  * 
- * @apiParam  {String} id id del modulo
+ * @apiParam  {Number} id id del modulo
  * 
  * @apiSucessExample {json} body
  * {
