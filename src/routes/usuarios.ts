@@ -3,10 +3,24 @@ import { Usuarios } from '../controllers/controller-usuarios'
 const controller = new Usuarios()
 const router = Router()
 
-router.get('/',controller.getAll)
-router.get('/:id',controller.getById)
-router.post('/',controller.create)
-router.put('/:id',controller.editById)
-router.delete('/:id',controller.deleteById)
+/**
+ * 
+ * @api {get} /usuarios Varios usuarios
+ * @apiGroup /usuarios
+ * 
+
+/**
+ * 
+ * @api {get} /usuarios/:id Un usuario
+ * @apiGroup /usuarios
+ * 
+ * @apiParam  {String} id id del usuario
+ * 
+ * 
+ */
+
+
+router.get('/', controller.getAll)
+router.get('/:id', controller.getById)
 
 export default router

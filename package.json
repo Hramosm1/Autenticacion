@@ -6,26 +6,38 @@
   "author": "Diego Jared  Donis Soto <programacion4@recagua.com>",
   "license": "MIT",
   "scripts": {
-    "start": "src/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node-dev --respawn src/index.ts",
-    "test": "jest"
+    "test": "jest",
+    "doc": "apidoc-markdown -i src -o README.md"
   },
   "dependencies": {
+    "@prisma/client": "^4.0.0",
+    "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.17.3",
+    "http-errors": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
-    "msnodesqlv8": "^2.4.7",
-    "mssql": "^8.1.0"
+    "lodash": "^4.17.21",
+    "prisma": "^4.0.0"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
+    "@types/http-errors": "^1.8.2",
+    "@types/jest": "^28.1.6",
     "@types/jsonwebtoken": "^8.5.8",
-    "@types/mssql": "^7.1.5",
+    "@types/lodash": "^4.14.182",
+    "@types/supertest": "^2.0.12",
+    "apidoc-markdown": "^7.1.1",
     "dotenv": "^16.0.0",
-    "jest": "^27.5.1",
+    "jest": "^28.1.3",
+    "prisma-dbml-generator": "^0.9.1",
+    "supertest": "^6.2.4",
+    "ts-jest": "^28.0.7",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.6.3"

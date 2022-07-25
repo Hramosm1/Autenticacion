@@ -1,31 +1,58 @@
-import { Request, Response } from 'express'
-import { getPool } from '../database'
-import { Bit, Int } from 'mssql/msnodesqlv8'
-import { BodyPermisos } from '../interfaces/interface-permisosPorRol'
+import { Request, Response, NextFunction } from 'express'
+import { prisma } from '../database'
+import { BadRequest, NotFound } from "http-errors";
 export class Permisosporrol {
-    async getById(req: Request, res: Response) {
+    async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params
         try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', Int, id)
-            const result = await request?.query('SELECT * FROM VW_Permisos WHERE idModulo = @id AND activo = 1')
-            res.send(result?.recordset)
+            const result = await prisma.permisos.findMany({
+                select: {
+                    id: true,
+                    ver: true,
+                    crear: true,
+                    editar: true,
+                    eliminar: true,
+                    Roles: {
+                        select: {
+                            id: true,
+                            nombre: true
+                        }
+                    },
+                    Modulos: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            Aplicaciones: {
+                                select: {
+                                    id: true,
+                                    nombre: true
+                                }
+                            }
+                        }
+                    },
+                },
+                where: {
+                    AND: [
+                        { idModulo: Number(id) },
+                        { Roles: { activo: { equals: true } } },
+                        { Modulos: { activo: { equals: true } } }
+                    ]
+                }
+            })
+            res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
-    async editPermisos(req: Request, res: Response) {
-        const body: BodyPermisos[] = Object.values(req.body)
-        const stIterable = body.map(({ ver, crear, editar, eliminar, id }) => `UPDATE Permisos SET ver=${Number(ver)}, crear=${Number(crear)}, editar=${Number(editar)}, eliminar=${Number(eliminar)} WHERE id = ${id}`)
+    async editPermisos(req: Request, res: Response, next: NextFunction) {
+        const permisos = []
         try {
-            const pool = await getPool()
-            for await (const query of stIterable) {
-                await pool?.query(query)
+            for await (const { ver, crear, editar, eliminar, id } of req.body) {
+                permisos.push(await prisma.permisos.update({ data: { ver, crear, editar, eliminar }, where: { id: Number(id) } }))
             }
-            res.send({ status: 200 })
+            res.send(permisos)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
 }

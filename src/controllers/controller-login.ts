@@ -1,47 +1,47 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { generateToken, validateToken, getUserLogin, getUserByToken, parseUser } from '../core/utils';
+import { Unauthorized, BadRequest, NotFound } from "http-errors";
 import { JwtPayload } from 'jsonwebtoken';
-import { Int, VarChar } from 'mssql/msnodesqlv8';
-import { generateToken, validateToken } from '../core/utils';
-import { getPool } from '../database';
 export class Login {
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response, next: NextFunction) {
     const exp = req.params.duracion || '24h'
-    const { user, password, aplicacion } = req.body
     try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('user', VarChar(150), user)
-      request?.input('pass', VarChar(150), password)
-      request?.input('idApp', Int, aplicacion)
-      const result = await request?.execute('SP_Login')
-      if (result?.recordsets.length == 3) {
-        const [usuario, permisos, permisosEspeciales] = result?.recordsets as Array<any[]>
-        res.send({ accessToken: generateToken({ user, password, aplicacion }, exp), user: { ...usuario[0], permisos, permisosEspeciales } })
-      } else res.status(401).send(result?.recordset[0])
+      //-----------------VALIDACION DE USUARIO
+      const permisos = await getUserLogin(req.body)
+      if (permisos) {
+        //-----------------GENERACION DE TOKEN
+        const accessToken = generateToken({ id: permisos.id, idAplicacion: Number(req.body.aplicacion) }, exp)
+        //-----------------GENERACION DE RESULTADO
+        const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = permisos
+        const user = parseUser(id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario)
+        res.send({ accessToken, user })
+      }
+      else {
+        next(new Unauthorized('Usuario o contraseña no válidos'))
+      }
     } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
+      next(new BadRequest(ex))
     }
   }
-  async loginWithToken(req: Request, res: Response) {
-    try {
-      const { user, password, aplicacion } = validateToken(req.params.token) as JwtPayload
-      const exp = '24h'
+  async loginWithToken(req: Request, res: Response, next: NextFunction) {
+    const exp = '24h'
+    if (req.headers.authorization) {
+      const [tipo, accessToken] = req.headers.authorization.split(' ')
       try {
-        const pool = await getPool()
-        const request = pool?.request()
-        request?.input('user', VarChar(150), user)
-        request?.input('pass', VarChar(150), password)
-        request?.input('idApp', Int, aplicacion)
-        const result = await request?.execute('SP_Login')
-        if (result?.recordsets.length == 3) {
-          const [usuario, permisos, permisosEspeciales] = result?.recordsets as Array<any[]>
-          res.send({ accessToken: generateToken({ user, password, aplicacion }, exp), user: { ...usuario[0], permisos, permisosEspeciales } })
-        } else res.status(401).send(result?.recordset[0])
+        const { id, idAplicacion } = validateToken(accessToken) as JwtPayload
+        const permisos = await getUserByToken(id, idAplicacion)
+        if (permisos) {
+          const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = permisos
+          const user = parseUser(id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario)
+          res.send({ accessToken, user })
+        } else {
+          next(new NotFound())
+        }
       } catch (ex: any) {
-        res.status(404).send({ message: 'error en la consulta', error: ex.message })
+        next(new Unauthorized(ex))
       }
-    } catch (error) {
-      res.status(403).send('token no valido')
+    } else {
+      next(new Unauthorized('falta token'))
     }
   }
 }
