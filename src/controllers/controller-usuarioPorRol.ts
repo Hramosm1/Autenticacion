@@ -1,62 +1,99 @@
-import { Request, Response } from 'express'
-import { getPool } from '../database'
-import { Int, VarChar } from 'mssql/msnodesqlv8'
+import { Request, Response, NextFunction } from 'express'
+import { prisma } from '../database'
+import { BadRequest, NotFound } from "http-errors";
 export class UsuariosPorRol {
-  async getAll(req: Request, res: Response) {
-    res.send('ok')
-  }
-  async getById(req: Request, res: Response) {
-    const { id } = req.params
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('id', Int, id)
-      const result = await request?.query('SELECT * FROM VW_RolPorUsuario WHERE idAplicacion = @id')
-      res.send(result?.recordset)
-    } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
-    }
-  }
-  async create(req: Request, res: Response) {
-    const { idUsuario, idRol, idAplicacion } = req.body
-    try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('idUsuario', Int, idUsuario)
-      request?.input('idRol', Int, idRol)
-      request?.input('idAplicacion', Int, idAplicacion)
-      const result = await request?.query('INSERT into RolPorUsuario (idUsuario, idRol, idAplicacion) VALUES (@IdUsuario, @idRol, idAplicacion)')
+      const result = await prisma.rolPorUsuario.findMany({
+        select: {
+          id: true,
+          Usuarios: {
+            select: {
+              id: true,
+              idCobrador: true,
+              nombre: true,
+              usuario: true
+            }
+          },
+          Roles: {
+            select: {
+              id: true,
+              nombre: true
+            }
+          },
+          Aplicaciones: {
+            select: {
+              id: true,
+              nombre: true
+            }
+          },
+        }
+      })
       res.send(result)
     } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
+      next(new BadRequest(ex))
     }
   }
-  async editById(req: Request, res: Response) {
+  async getById(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params
-    const { idUsuario, idRol, idAplicacion } = req.body
     try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('idUsuario', Int, idUsuario)
-      request?.input('idRol', Int, idRol)
-      request?.input('idAplicacion', Int, idAplicacion)
-      request?.input('id', Int, id)
-      const result = await request?.query('UPDATE RolPorUsuario SET idUsuario = @idUsuario, idRol = @idRol, idAplicacion = @idAplicacion WHERE id = @id')
+      const result = await prisma.rolPorUsuario.findMany({
+        select: {
+          id: true,
+          Usuarios: {
+            select: {
+              id: true,
+              idCobrador: true,
+              nombre: true,
+              usuario: true
+            }
+          },
+          Roles: {
+            select: {
+              id: true,
+              nombre: true
+            }
+          },
+          Aplicaciones: {
+            select: {
+              id: true,
+              nombre: true
+            }
+          },
+        },
+        where: { idAplicacion: Number(id) }
+      })
       res.send(result)
     } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
+      next(new BadRequest(ex))
     }
   }
-  async deleteById(req: Request, res: Response) {
-    const { id } = req.params
+  async create(req: Request, res: Response, next: NextFunction) {
+    const data = req.body
     try {
-      const pool = await getPool()
-      const request = pool?.request()
-      request?.input('id', Int, id)
-      const result = await request?.query('DELETE RolPorUsuario WHERE id = @id')
+      const result = await prisma.rolPorUsuario.create({ data })
       res.send(result)
     } catch (ex: any) {
-      res.status(404).send({ message: 'error en la consulta', error: ex.message })
+      next(new BadRequest(ex))
+    }
+  }
+  async editById(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params
+    const data = req.body
+    try {
+      const result = await prisma.rolPorUsuario.update({ data, where: { id: Number(id) } })
+      res.send(result)
+    } catch (ex: any) {
+      next(new BadRequest(ex))
+    }
+  }
+  async deleteById(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params
+    try {
+      const result = await prisma.rolPorUsuario.delete({ where: { id: Number(id) } })
+      res.send(result)
+    } catch (ex: any) {
+      next(new BadRequest(ex))
     }
   }
 }

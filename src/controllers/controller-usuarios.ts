@@ -1,57 +1,47 @@
-import { Request, Response } from 'express'
-import { getPool } from '../database'
-import { UniqueIdentifier } from 'mssql/msnodesqlv8'
+import { Request, Response, NextFunction } from 'express'
+import { prisma } from '../database'
+import { BadRequest, NotFound } from "http-errors";
 export class Usuarios {
-    async getAll(req: Request, res: Response) {
+    async getAll(req: Request, res: Response, next: NextFunction) {
         try {
-            const conn = await getPool()
-            const result = await conn?.query('SELECT id, usuario, nombre, correo FROM Usuarios WHERE activo = 1')
-            await conn?.close()
-            res.send(result?.recordset)
+            const result = await prisma.usuarios.findMany({
+                select: {
+                    id: true,
+                    usuario: true,
+                    nombre: true,
+                    correo: true
+                },
+                where: {
+                    activo: {
+                        equals: true
+                    }
+                }
+            })
+            res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
-    async getById(req: Request, res: Response) {
+    async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params
         try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', UniqueIdentifier, id)
-            const result = await request?.query('SELECT id, usuario, nombre, idPersonaUnica, idCobrador, correo, fechaCreacion  FROM Usuarios WHERE id = @id')
-            res.send(result?.recordset[0])
+            const result = await prisma.usuarios.findMany({
+                select: {
+                    id: true,
+                    usuario: true,
+                    nombre: true,
+                    idPersonaUnica: true,
+                    idCobrador: true,
+                    correo: true,
+                    fechaCreacion: true
+                },
+                where: {
+                    id
+                }
+            })
+            res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
-        }
-    }
-    async create(req: Request, res: Response) {
-        const pool = await getPool()
-        const body = req.body
-        try {
-            /* const request = pool.request()
-             request.input()*/
-        } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
-        }
-    }
-    async editById(req: Request, res: Response) {
-        const pool = await getPool()
-        const { id } = req.params
-        try {
-            /*const request = pool.request()
-            request.input('id', Int, id)*/
-        } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
-        }
-    }
-    async deleteById(req: Request, res: Response) {
-        const pool = await getPool()
-        const { id } = req.params
-        try {
-            /* const request = pool.request()
-             request.input('id', Int, id)*/
-        } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
 }

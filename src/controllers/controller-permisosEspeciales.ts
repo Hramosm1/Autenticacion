@@ -1,66 +1,74 @@
-import { Request, Response } from 'express'
-import { getPool } from '../database'
-import { Int, VarChar } from 'mssql/msnodesqlv8'
+import { Request, Response, NextFunction } from 'express'
+import { prisma } from '../database'
+import { BadRequest, NotFound } from "http-errors";
 export class Permisosespeciales {
-    async getAll(req: Request, res: Response) {
+    async getAll(req: Request, res: Response, next: NextFunction) {
         try {
-            const pool = await getPool()
-            const result = await pool?.query('SELECT id, nombre, aplicacion, idAplicacion FROM VW_PermisosEspeciales WHERE activo = 1')
-            res.send(result?.recordset)
-        } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
-        }
-    }
-    async getById(req: Request, res: Response) {
-        const { id } = req.params
-        try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', Int, id)
-            const result = await request?.query('SELECT id, nombre, aplicacion FROM VW_PermisosEspeciales WHERE activo = 1 AND idAplicacion = @id')
-            res.send(result?.recordset)
-        } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
-        }
-    }
-    async create(req: Request, res: Response) {
-        const { nombre, idAplicacion } = req.body
-        try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('nombre', VarChar(150), nombre)
-            request?.input('idAplicacion', Int, idAplicacion)
-            const result = await request?.query('INSERT INTO PermisosEspeciales (nombre, idAplicacion) VALUES (@nombre, @idAplicacion)')
+            const result = await prisma.permisosEspeciales.findMany({
+                select: {
+                    id: true,
+                    nombre: true,
+                    Aplicaciones: {
+                        select: {
+                            id: true,
+                            nombre: true
+                        }
+                    }
+                },
+                where: { activo: true }
+            })
             res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
-    async editById(req: Request, res: Response) {
+    async getById(req: Request, res: Response, next: NextFunction) {
         const { id } = req.params
-        const { nombre, idAplicacion } = req.body
         try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', Int, id)
-            request?.input('nombre', VarChar(150), nombre)
-            request?.input('idAplicacion', Int, idAplicacion)
-            const result = await request?.query('UPDATE PermisosEspeciales SET nombre = @nombre, idAplicacion = @idAplicacion WHERE id = @id')
+            const result = await prisma.permisosEspeciales.findMany({
+                select: {
+                    id: true,
+                    nombre: true,
+                    Aplicaciones: {
+                        select: {
+                            id: true,
+                            nombre: true
+                        }
+                    }
+                },
+                where: { AND: [{ activo: true }, { idAplicacion: Number(id) }] }
+            })
             res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
         }
     }
-    async deleteById(req: Request, res: Response) {
-        const { id } = req.params
+    async create(req: Request, res: Response, next: NextFunction) {
+        const data = req.body
         try {
-            const pool = await getPool()
-            const request = pool?.request()
-            request?.input('id', Int, id)
-            const result = await request?.query('UPDATE PermisosEspeciales SET activo = 0 WHERE id = @id')
+            const result = await prisma.permisosEspeciales.create({ data })
             res.send(result)
         } catch (ex: any) {
-            res.status(404).send({ message: 'error en la consulta', error: ex.message })
+            next(new BadRequest(ex))
+        }
+    }
+    async editById(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params
+        const data = req.body
+        try {
+            const result = await prisma.permisosEspeciales.update({ data, where: { id: Number(id) } })
+            res.send(result)
+        } catch (ex: any) {
+            next(new BadRequest(ex))
+        }
+    }
+    async deleteById(req: Request, res: Response, next: NextFunction) {
+        const { id } = req.params
+        try {
+            const result = await prisma.permisosEspeciales.update({ data: { activo: false }, where: { id: Number(id) } })
+            res.send(result)
+        } catch (ex: any) {
+            next(new BadRequest(ex))
         }
     }
 }
