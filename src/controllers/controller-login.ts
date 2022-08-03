@@ -6,12 +6,12 @@ export class Login {
   async login(req: Request, res: Response, next: NextFunction) {
     const exp = req.params.duracion || '24h'
     try {
-      //-----------------VALIDACION DE USUARIO
+      //-----------------VALIDACIÓN DE USUARIO
       const permisos = await getUserLogin(req.body)
       if (permisos) {
-        //-----------------GENERACION DE TOKEN
+        //-----------------GENERACIÓN DE TOKEN
         const accessToken = generateToken({ id: permisos.id, idAplicacion: Number(req.body.aplicacion) }, exp)
-        //-----------------GENERACION DE RESULTADO
+        //-----------------GENERACIÓN DE RESULTADO
         const { id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario } = permisos
         const user = parseUser(id, usuario, nombre, idPersonaUnica, correo, RolPorUsuario)
         res.send({ accessToken, user })
