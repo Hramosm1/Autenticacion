@@ -1,0 +1,4 @@
+GET {{host}}/usuarioPorRol/1
+Accept: application/json
+
+###

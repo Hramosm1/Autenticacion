@@ -4894,3 +4894,8 @@
     "archiver-utils" "^2.1.0"
     "compress-commons" "^4.1.0"
     "readable-stream" "^3.6.0"
+
+"zod@^3.19.1":
+  "integrity" "sha512-LYjZsEDhCdYET9ikFu6dVPGp2YH9DegXjdJToSzD9rO6fy4qiRYFoyEYwps88OseJlPyl2NOe2iJuhEhL7IpEA=="
+  "resolved" "https://registry.npmjs.org/zod/-/zod-3.19.1.tgz"
+  "version" "3.19.1"

@@ -14,6 +14,7 @@ import roles from './routes/roles'
 import usuarios from './routes/usuarios'
 import upr from './routes/usuarioPorRol'
 import login from './routes/login'
+import importaciones from './routes/importaciones'
 import supertest from 'supertest'
 dotenv.config()
 class ExpressApp {
@@ -43,6 +44,7 @@ class ExpressApp {
     this.app.use('/usuarios', usuarios)
     this.app.use('/usuarioPorRol', upr)
     this.app.use('/login', login)
+    this.app.use('/importaciones', importaciones)
   }
   async start() {
     await this.app.listen(this.app.get('port'))
